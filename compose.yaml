@@ -1,0 +1,12 @@
+version: "0.1.0"
+
+services:
+  db:
+    image: mysql:8.4
+    restart: always
+    env_file: .env
+
+  booking:
+    image: booking:0.1.0
+
+
