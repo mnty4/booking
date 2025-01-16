@@ -27,6 +27,8 @@ func run(ctx context.Context, getEnv func(string) string, w io.Writer, args []st
 	if *envFile != "" {
 		godotenv.Load(*envFile)
 	}
+	logger := log.New(os.Stdout, "[Booking Service]", log.Ldate|log.Ltime|log.Lmicroseconds|log.Llongfile)
+
 	dbConfig := mysql.Config{
 		DBName: getEnv("MYSQL_DATABASE"),
 		User:   getEnv("MYSQL_USER"),
@@ -34,9 +36,11 @@ func run(ctx context.Context, getEnv func(string) string, w io.Writer, args []st
 		Net:    getEnv("MYSQL_NET"),
 		Addr:   getEnv("MYSQL_ADDR"),
 	}
-	db := db.NewDb("mysql", dbConfig.FormatDSN())
+	db, err := db.NewDb(logger, "mysql", dbConfig.FormatDSN())
+	if err != nil {
+		return fmt.Errorf("failed to create db: %v", err)
+	}
 
-	logger := log.New(os.Stdout, "[Booking Service]", log.Ldate|log.Ltime|log.Lmicroseconds|log.Llongfile)
 	config := &ServerConfig{}
 	mux := booking.NewServer(config, logger, db)
 

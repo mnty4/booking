@@ -26,7 +26,7 @@ func TestRun(t *testing.T) {
 	}
 	go func() {
 		err := run(ctx, getEnv, nil, nil)
-		t.Errorf("Run failed: %v\n", err)
+		t.Errorf("starting server failed: %v", err)
 		cancel()
 	}()
 	url := "http://localhost:" + PORT + "/healthz"

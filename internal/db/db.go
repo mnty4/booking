@@ -2,13 +2,18 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 )
 
-func NewDb(driverName, dsn string) *sql.DB {
+func NewDb(logger *log.Logger, driverName, dsn string) (*sql.DB, error) {
 	db, err := sql.Open(driverName, dsn)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("error opening db: %v", err)
 	}
-	return db
+	err = db.Ping()
+	if err != nil {
+		return nil, fmt.Errorf("error pinging db: %v", err)
+	}
+	return db, nil
 }
