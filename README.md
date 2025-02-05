@@ -10,8 +10,6 @@
 ## Local Development
 Instructions for setting up the local development environment.
 
-### TCP
-
 1. Open your workspace in terminal and clone the project:
     - `git clone https://github.com/mnty4/booking`
 
@@ -25,7 +23,6 @@ https://dev.mysql.com/doc/refman/8.4/en/getting-mysql.html
     - `CREATE DATABASE IF NOT EXISTS booking;`
     - `CREATE USER IF NOT EXISTS dev_user@localhost IDENTIFY BY <password>;`
     - `GRANT ALL PRIVILEGES ON booking.* TO dev_user@localhost;`
-    - `FLUSH PRIVILEGES;`
 
 4. Run the following command in the terminal to populate the database from a sample backup:
     - `mysql -u dev_user -p booking < /PATH/TO/SRC/backup/booking.sql`
