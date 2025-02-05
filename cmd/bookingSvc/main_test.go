@@ -10,7 +10,6 @@ import (
 )
 
 // test run start up
-
 func TestRun(t *testing.T) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -20,17 +19,28 @@ func TestRun(t *testing.T) {
 		switch key {
 		case "PORT":
 			return PORT
+		case "MYSQL_DATABASE":
+			return "bookingtest"
+		case "MYSQL_USER":
+			return "test_user"
+		case "MYSQL_PASSWORD":
+			return "devpass"
+		case "MYSQL_NET":
+			return "tcp"
+		case "MYSQL_ADDR":
+			return "127.0.0.1:3306"
 		default:
 			return ""
 		}
 	}
 	go func() {
-		err := run(ctx, getEnv, nil, nil)
-		t.Errorf("starting server failed: %v", err)
+		if err := run(ctx, getEnv, os.Stdout, nil); err != nil {
+			t.Errorf("starting server failed: %v", err)
+		}
 		cancel()
 	}()
 	url := "http://localhost:" + PORT + "/healthz"
-	err := waitForReady(ctx, 5*time.Second, url)
+	err := waitForReady(ctx, 20*time.Second, url)
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,5 +76,3 @@ func waitForReady(ctx context.Context, timeout time.Duration, url string) error 
 		}
 	}
 }
-
-// test run and graceful shutdown

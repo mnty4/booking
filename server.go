@@ -12,8 +12,11 @@ type Config interface {
 /*
 Create a primary http.Handler to be served by the application
 */
-func NewServer(config Config, logger *log.Logger, db *sql.DB) http.Handler {
+func NewServer(getEnv func(string) string, config Config, logger *log.Logger, db *sql.DB) http.Server {
 	mux := http.NewServeMux()
 	addRoutes(mux, db)
-	return mux
+	return http.Server{
+		Handler: mux,
+		Addr:    ":" + getEnv("PORT"),
+	}
 }

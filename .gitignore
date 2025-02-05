@@ -1,1 +1,4 @@
-.env
+.env*
+!.env.tcp-example
+!.env.unix-example
+bin/*
