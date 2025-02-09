@@ -1,4 +1,4 @@
-package booking
+package api
 
 type BookingStore interface {
 	Get(id int)
