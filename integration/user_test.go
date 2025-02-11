@@ -48,7 +48,6 @@ func TestUserPost(t *testing.T) {
 			t.Fatal(err)
 		}
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Accept", "application/json")
 		client := new(http.Client)
 		resp, err := client.Do(req)
 		if err != nil {
@@ -61,34 +60,3 @@ func TestUserPost(t *testing.T) {
 		}
 	}
 }
-
-// func TestUserPostHandler(t *testing.T) {
-// 	req, err := http.NewRequest("POST", "/users", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	sql.db
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(userPostHandler())
-// 	handler.ServeHTTP(rr, req)
-
-// 	if rr.Code != http.StatusCreated {
-// 		t.Errorf("expected status %d but got %d", http.StatusCreated, rr.Code)
-// 	}
-// }
-
-// func TestUserGetHandler(t *testing.T) {
-
-// 	req, err := http.NewRequest("POST", "/users/"+id, nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(userPostHandler())
-// 	handler.ServeHTTP(rr, req)
-
-// 	if rr.Code != http.StatusCreated {
-// 		t.Errorf("expected status %d but got %d", http.StatusCreated, rr.Code)
-// 	}
-// }

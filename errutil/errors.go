@@ -55,6 +55,10 @@ func WriteAPIError(w http.ResponseWriter, message string, code int, status strin
 	return nil
 }
 
+func WriteBadRequestError(w http.ResponseWriter, message string) error {
+	return WriteAPIError(w, message, http.StatusBadRequest, "BAD_REQUEST", nil)
+}
+
 func WriteInternalError(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
