@@ -13,7 +13,7 @@ import (
 	"github.com/mnty4/booking/repository"
 )
 
-func UserPostHandler(getEnv func(string) string, db *sql.DB, logger *log.Logger) func(http.ResponseWriter, *http.Request) {
+func UserCreateHandler(getEnv func(string) string, db *sql.DB, logger *log.Logger) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
 		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {

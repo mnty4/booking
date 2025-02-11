@@ -11,7 +11,7 @@ func AddRoutes(getEnv func(string) string, mux *http.ServeMux, db *sql.DB, logge
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 	})
-	mux.HandleFunc("POST /api/users", UserPostHandler(getEnv, db, logger))
+	mux.HandleFunc("POST /api/users", UserCreateHandler(getEnv, db, logger))
 	// mux.HandleFunc("GET /api/bookings", bookingGetHandler())
 	// mux.HandleFunc("POST /api/bookings", bookingPostHandler())
 }
