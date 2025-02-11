@@ -55,45 +55,45 @@ func TestCreateUserInvalid(t *testing.T) {
 		msg         string
 		payloadJSON string
 		code        int
-		status      string
+		status      errutil.ErrorStatus
 	}{
 		{"missing firstName", `{
 			"email": "John.Doe@email.com",
 			"lastName": "Doe"
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 		{"missing lastName", `{
 			"email": "John.Doe@email.com",
 			"firstName": "John"
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 		{"missing email", `{
 			"firstName": "John",
 			"lastName": "Doe"
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 		{"empty firstName", `{
 			"email": "John.Doe@email.com",
 			"firstName": "",
 			"lastName": "Doe"
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 		{"empty lastName", `{
 			"email": "John.Doe@email.com",
-			"firstName": "John,
+			"firstName": "John",
 			"lastName": ""
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 		{"email no @", `{
 			"email": "johndoe",
 			"firstName": "",
 			"lastName": "Doe"
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 		{"email no domain", `{
 			"email": "johndoe@",
 			"firstName": "",
 			"lastName": "Doe"
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 		{"email no local part", `{
 			"email": "@johndoe",
 			"firstName": "",
 			"lastName": "Doe"
-		}`, 400, "VALIDATION"},
+		}`, 400, errutil.StatusValidation},
 	}
 	client := new(http.Client)
 	for _, tc := range testCases {
@@ -119,8 +119,8 @@ func TestCreateUserInvalid(t *testing.T) {
 			if apiErr.Code != tc.code {
 				t.Errorf("expected status code %d but got %d.", tc.code, apiErr.Code)
 			}
-			if apiErr.GetStatus() != tc.status {
-				t.Errorf("expected status %q but got %q.", tc.status, apiErr.GetStatus())
+			if apiErr.Status != tc.status {
+				t.Errorf("expected status %q but got %q.", tc.status, apiErr.Status)
 			}
 
 		})

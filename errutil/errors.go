@@ -14,38 +14,29 @@ import (
 // - Status: A string for programmatic error classification; more granular than the code.
 // - Details: Additional custom error information unique to the endpoint.
 type APIError struct {
-	Message string `json:"message"`
-	Code    int    `json:"code"`
-	status  string
+	Message string        `json:"message"`
+	Code    int           `json:"code"`
+	Status  ErrorStatus   `json:"status"`
 	Details []interface{} `json:"details"`
 }
+type ErrorStatus string
 
-func NewAPIError(message string, code int, status string, details []interface{}) APIError {
+const (
+	StatusInternal   ErrorStatus = "INTERNAL"
+	StatusBadRequest ErrorStatus = "BAD_REQUEST"
+	StatusValidation ErrorStatus = "VALIDATION"
+)
+
+func NewAPIError(message string, code int, status ErrorStatus, details []interface{}) APIError {
 	apiError := APIError{}
-	apiError.SetStatus(status)
+	apiError.Status = status
 	apiError.Code = code
 	apiError.Message = message
 	apiError.Details = details
 	return apiError
 }
-func (e *APIError) GetStatus() string {
-	return e.status
-}
-func (e *APIError) SetStatus(status string) {
-	switch status {
-	case "INTERNAL":
-		break
-	case "BAD_REQUEST":
-		break
-	case "VALIDATION":
-		break
-	default:
-		status = "UNKNOWN"
-	}
-	e.status = status
-}
 
-func WriteAPIError(w http.ResponseWriter, message string, code int, status string, details []interface{}) error {
+func WriteAPIError(w http.ResponseWriter, message string, code int, status ErrorStatus, details []interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	apiError := NewAPIError(message, code, status, details)
