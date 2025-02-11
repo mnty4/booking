@@ -3,44 +3,92 @@ package errutil
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 )
 
+// The base error struct for sending errors to a client
+// - Message: A human-readable description of the error.
+// - Code: A high-level error code, defaulted to the HTTP status code.
+// - Status: A string for programmatic error classification; more granular than the code.
+// - Details: Additional custom error information unique to the endpoint.
 type APIError struct {
-	Code    int    `json:"code"`
 	Message string `json:"message"`
+	Code    int    `json:"code"`
+	status  string
+	Details []interface{} `json:"details"`
 }
 
-func NewAPIError(w http.ResponseWriter, logger *log.Logger, code int, err error, message string) {
-	logger.Printf("Error %d: %v\n", code, err)
-	apiError := APIError{
-		Code:    code,
-		Message: message,
+func NewAPIError(message string, code int, status string, details []interface{}) APIError {
+	apiError := APIError{}
+	apiError.SetStatus(status)
+	apiError.Code = code
+	apiError.Message = message
+	apiError.Details = details
+	return apiError
+}
+func (e *APIError) GetStatus() string {
+	return e.status
+}
+func (e *APIError) SetStatus(status string) {
+	switch status {
+	case "INTERNAL":
+		break
+	case "BAD_REQUEST":
+		break
+	case "VALIDATION":
+		break
+	default:
+		status = "UNKNOWN"
 	}
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(apiError.Code)
-	if err := json.NewEncoder(w).Encode(apiError); err != nil {
-		logger.Printf("Error encoding APIError: %v", err)
-	}
+	e.status = status
 }
 
-func NewInternalError(w http.ResponseWriter, logger *log.Logger, code int, err error) {
-	NewAPIError(w, logger, http.StatusInternalServerError, err, "Internal Server error.")
+func WriteAPIError(w http.ResponseWriter, message string, code int, status string, details []interface{}) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	apiError := NewAPIError(message, code, status, details)
+	if err := json.NewEncoder(w).Encode(&apiError); err != nil {
+		return err
+	}
+	return nil
 }
 
-func WriteValidationError(w http.ResponseWriter, logger *log.Logger, err error) {
-	if err, ok := err.(*validator.InvalidValidationError); ok {
-		logger.Println(*err)
-		WriteInternalError(w, logger, err)
+func WriteInternalError(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+	apiError := NewAPIError(
+		http.StatusText(http.StatusInternalServerError),
+		http.StatusInternalServerError,
+		"INTERNAL",
+		nil,
+	)
+	if err := json.NewEncoder(w).Encode(&apiError); err != nil {
+		return err
 	}
-	w.WriteHeader(400)
+	return nil
+}
+
+func WriteValidationError(w http.ResponseWriter, err error) error {
+	if _, ok := err.(*validator.InvalidValidationError); ok {
+		return WriteInternalError(w)
+	}
+	var message string
+	details := make([]string, 0)
 	if err, ok := err.(validator.ValidationErrors); ok {
-		logger.Println(err)
 		for _, validationErr := range err {
-			w.Write([]byte(fmt.Sprintf("%s: %s", validationErr.Field(), validationErr.Error())))
+			details = append(details, fmt.Sprintf("%s: %s", validationErr.Field(), validationErr.Error()))
 		}
+	} else {
+		message = "some message"
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	apiError := NewAPIError(message, http.StatusBadRequest, "VALIDATION", []interface{}{details})
+	if err := json.NewEncoder(w).Encode(&apiError); err != nil {
+		return err
+	}
+	return nil
 }
