@@ -87,7 +87,7 @@ func Run(ctx context.Context, getEnv func(string) string, w io.Writer, args []st
 
 func RunTestServer(ctx context.Context, logger *log.Logger, getEnv func(string) string, cancel context.CancelFunc) {
 	defer cancel()
-	if err := Run(ctx, getEnv, os.Stdout, nil); err != nil {
+	if err := Run(ctx, getEnv, io.Discard, nil); err != nil {
 		logger.Fatalf("starting server failed: %v", err)
 	}
 }
