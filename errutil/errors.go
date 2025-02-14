@@ -28,12 +28,12 @@ const (
 )
 
 func NewAPIError(message string, code int, status ErrorStatus, details []interface{}) APIError {
-	apiError := APIError{}
-	apiError.Status = status
-	apiError.Code = code
-	apiError.Message = message
-	apiError.Details = details
-	return apiError
+	return APIError{
+		Status:  status,
+		Code:    code,
+		Message: message,
+		Details: details,
+	}
 }
 
 func WriteAPIError(w http.ResponseWriter, message string, code int, status ErrorStatus, details []interface{}) error {
@@ -69,14 +69,14 @@ func WriteValidationError(w http.ResponseWriter, err error) error {
 	if _, ok := err.(*validator.InvalidValidationError); ok {
 		return WriteInternalError(w)
 	}
-	var message string
+	message := "Error validating fields."
 	details := make([]string, 0)
 	if err, ok := err.(validator.ValidationErrors); ok {
 		for _, validationErr := range err {
 			details = append(details, fmt.Sprintf("%s: %s", validationErr.Field(), validationErr.Error()))
 		}
 	} else {
-		message = "some message"
+		return WriteBadRequestError(w, http.StatusText(http.StatusBadRequest))
 	}
 
 	w.Header().Set("Content-Type", "application/json")
