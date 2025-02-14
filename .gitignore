@@ -2,3 +2,4 @@
 !.env.tcp-example
 !.env.unix-example
 bin/*
+trace.out

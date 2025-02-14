@@ -1,0 +1,1 @@
+go test -trace=trace.out -tags=integration -v -count=1 ./integration
