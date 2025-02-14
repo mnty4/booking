@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/mnty4/booking/internal/app"
@@ -10,8 +10,15 @@ import (
 
 func main() {
 	ctx := context.Background()
-	if err := app.Run(ctx, os.Getenv, os.Stdout, os.Args[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+	if err := app.ParseFlags(os.Args[1:]); err != nil {
+		log.Fatal(err)
 	}
+	server, err := app.NewServer(os.Stdout)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := server.Run(ctx); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Server shutdown gracefully.")
 }

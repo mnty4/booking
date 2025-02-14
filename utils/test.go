@@ -1,38 +1,29 @@
-/* defines useful helpers for testing the service */
-package helpers
+package utils
 
 import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
 
-// func NewTestDb(logger *log.Logger) (*sql.DB, error) {
-
-// 	return db.NewDb(logger, "mysql", dsn)
-// }
-
-func NewTestEnv() func(key string) string {
-	return func(key string) string {
-		switch key {
-		case "PORT":
-			return "8080"
-		case "MYSQL_DATABASE":
-			return "bookingtest"
-		case "MYSQL_USER":
-			return "test_user"
-		case "MYSQL_PASSWORD":
-			return "devpass"
-		case "MYSQL_NET":
-			return "tcp"
-		case "MYSQL_ADDR":
-			return "127.0.0.1:3306"
-		default:
-			return ""
-		}
+func NewTestClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
 	}
+}
+
+func HealthCheck(ctx context.Context, timeout time.Duration) error {
+	url, err := url.Parse(os.Getenv("BASE_URL"))
+	if err != nil {
+		return err
+	}
+	url.Path = "healthz"
+	return WaitForReady(ctx, timeout, url.String())
 }
 
 func WaitForReady(ctx context.Context, timeout time.Duration, url string) error {

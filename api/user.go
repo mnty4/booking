@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mnty4/booking/errutil"
@@ -13,7 +14,7 @@ import (
 	"github.com/mnty4/booking/repository"
 )
 
-func UserCreateHandler(getEnv func(string) string, db *sql.DB, logger *log.Logger) func(http.ResponseWriter, *http.Request) {
+func UserCreateHandler(logger *log.Logger, db *sql.DB, validate *validator.Validate) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
 		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -24,7 +25,6 @@ func UserCreateHandler(getEnv func(string) string, db *sql.DB, logger *log.Logge
 			return
 		}
 		r.Body.Close()
-		validate := validator.New()
 		if err := validate.Struct(user); err != nil {
 			logger.Printf("Error validating user: %v\n", err)
 			if err := errutil.WriteValidationError(w, err); err != nil {
@@ -41,6 +41,6 @@ func UserCreateHandler(getEnv func(string) string, db *sql.DB, logger *log.Logge
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		w.Header().Set("Location", fmt.Sprintf("%s/api/users/%d", getEnv("BASE_URL"), id))
+		w.Header().Set("Location", fmt.Sprintf("%s/api/users/%d", os.Getenv("BASE_URL"), id))
 	}
 }

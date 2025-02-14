@@ -9,16 +9,8 @@ import (
 	"testing"
 
 	"github.com/mnty4/booking/errutil"
-	"github.com/mnty4/booking/model"
+	"github.com/mnty4/booking/utils"
 )
-
-func NewUser() model.User {
-	return model.User{
-		Email:     "John.Doe@email.com",
-		FirstName: "John",
-		LastName:  "Doe",
-	}
-}
 
 func TestCreateUserValid(t *testing.T) {
 	testCases := []struct {
@@ -31,13 +23,13 @@ func TestCreateUserValid(t *testing.T) {
 			"lastName": "Doe"
 		}`},
 	}
+	client := utils.NewTestClient()
 	for _, tc := range testCases {
 		req, err := http.NewRequest("POST", "http://localhost:8080/api/users", bytes.NewReader([]byte(tc.payloadJSON)))
 		if err != nil {
 			t.Fatal(err)
 		}
 		req.Header.Set("Content-Type", "application/json")
-		client := new(http.Client)
 		resp, err := client.Do(req)
 		if err != nil {
 			t.Fatal(err)
@@ -95,7 +87,7 @@ func TestCreateUserInvalid(t *testing.T) {
 			"lastName": "Doe"
 		}`, 400, errutil.StatusValidation},
 	}
-	client := new(http.Client)
+	client := utils.NewTestClient()
 	for _, tc := range testCases {
 		t.Run(tc.msg, func(t *testing.T) {
 			t.Parallel()
